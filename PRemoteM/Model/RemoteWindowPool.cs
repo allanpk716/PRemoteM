@@ -264,11 +264,16 @@ namespace PRM.Model
             vmProtocolServer.Server.RunScriptBeforConnect();
 
             // smart protocol
+            bool bok = false;
+            string OrgAddress = "";
+            string OrgPort = "";
             if (vmProtocolServer.Server is ProtocolServerWithAddrPortBase p)
             {
-                var bok = vmProtocolServer.Server.SmartProtocolCheck(p.Protocol, p.Address, out string oAddress, out string oPort);
+                bok = vmProtocolServer.Server.SmartProtocolCheck(p.Protocol, p.Address, out string oAddress, out string oPort);
                 if (bok == true)
                 {
+                    OrgAddress = p.Address;
+                    OrgPort = p.Port;
                     p.Address = oAddress;
                     p.Port = oPort;
                 }
@@ -285,6 +290,16 @@ namespace PRM.Model
                 ConnectWithFullScreen(vmProtocolServer);
             else
                 ConnectWithTab(vmProtocolServer, assignTabToken);
+
+            // change setting back
+            if (bok == true)
+            {
+                if (vmProtocolServer.Server is ProtocolServerWithAddrPortBase pback)
+                {
+                    pback.Address = OrgAddress;
+                    pback.Port = OrgPort;
+                }
+            }
 
             SimpleLogHelper.Debug($@"ProtocolHosts.Count = {_protocolHosts.Count}, FullWin.Count = {_host2FullScreenWindows.Count}, _tabWindows.Count = {_tabWindows.Count}");
         }
